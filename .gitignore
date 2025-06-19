@@ -1,0 +1,26 @@
+# Global Ignores (Applies to the entire repository)
+.DS_Store             # macOS specific files
+Thumbs.db             # Windows specific files
+.env                  # Generic environment files (sensitive, don't commit)
+.env.local            # More specific local environment files
+
+# IDE and Editor Specific Files (Adjust for your IDE)
+.idea/                # IntelliJ / WebStorm project files
+.vscode/              # VS Code settings (if you don't want to share)
+*.sublime-workspace
+*.iml
+.project
+.classpath
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+node_modules/
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# Dependency Directories (Can also be in sub-folders, but good as a global fallback)
+# If you have node_modules or similar directly in the root, uncomment these.
+# node_modules/
+# vendor/
