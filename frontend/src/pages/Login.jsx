@@ -2,9 +2,11 @@ import { useState } from "react";
 import { loginUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -17,17 +19,20 @@ const Login = () => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
 
+      toast.success("Login successful! 🎉");
       navigate(res.data.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
-      alert("Login failed: " + err.response.data.message);
+      toast.error(
+        "Login failed: " + (err.response?.data?.message || "Unknown error")
+      );
     }
   };
-  const [showPassword, setShowPassword] = useState(false);
 
   const togglePassword = () => setShowPassword((prev) => !prev);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
-      <div className="bg-white/80 backdrop-blur-md shadow-2xl rounded-2xl px-10 py-12 w-full max-w-md">
+      <div className="bg-white/80 backdrop-blur-md shadow-2xl rounded-2xl px-10 py-12 w-full max-w-md relative">
         {/* Back Icon */}
         <button
           type="button"
@@ -50,9 +55,11 @@ const Login = () => {
             />
           </svg>
         </button>
+
         <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-8">
           Sign in to your account
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
@@ -71,6 +78,7 @@ const Login = () => {
               required
             />
           </div>
+
           <div>
             <label
               htmlFor="password"
@@ -98,6 +106,7 @@ const Login = () => {
               </button>
             </div>
           </div>
+
           <button
             type="submit"
             className="w-full py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-lg shadow-md hover:from-blue-600 hover:to-purple-600 transition"

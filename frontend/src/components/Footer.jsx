@@ -28,7 +28,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="hover:text-[#1877F2] transition transform hover:scale-110"
+                className="text-[#1877F2] hover:text-[#145dbf] transition transform hover:scale-110"
               >
                 <FaFacebookF />
               </a>
@@ -37,7 +37,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Twitter"
-                className="hover:text-[#1DA1F2] transition transform hover:scale-110"
+                className="text-[#1DA1F2] hover:text-[#0d8ddb] transition transform hover:scale-110"
               >
                 <FaTwitter />
               </a>
@@ -46,7 +46,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="hover:text-[#0077B5] transition transform hover:scale-110"
+                className="text-[#0077B5] hover:text-[#005f8e] transition transform hover:scale-110"
               >
                 <FaLinkedinIn />
               </a>
@@ -55,7 +55,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
-                className="hover:text-black transition transform hover:scale-110"
+                className="text-[#171515] hover:text-[#000000] transition transform hover:scale-110"
               >
                 <FaGithub />
               </a>

@@ -6,6 +6,8 @@ import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import NotFound from "./pages/NotFound";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Dashboard = () => (
   <div className="text-center mt-10 text-lg font-semibold">
@@ -47,6 +49,17 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        {/* ToastContainer should be placed at the root level */}
+        <ToastContainer
+          position="top-right"
+          autoClose={2500}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="colored"
+        />
       </div>
     </Router>
   );
