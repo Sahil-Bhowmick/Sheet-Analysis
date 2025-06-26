@@ -22,11 +22,9 @@ const Navbar = () => {
     toast.success("Logged out successfully 👋");
 
     setMenuOpen(false);
-
-    // Refresh page after 2 seconds
     setTimeout(() => {
       navigate("/");
-      window.location.reload(); // refresh page
+      window.location.reload();
     }, 2000);
   };
 
@@ -80,6 +78,16 @@ const Navbar = () => {
                 <FiHome />
                 {role === "admin" ? "Admin Panel" : "Dashboard"}
               </Link>
+
+              {role === "user" && (
+                <Link
+                  to="/history"
+                  className="flex items-center gap-1 text-gray-700 hover:text-indigo-600 transition font-medium"
+                >
+                  📁 History
+                </Link>
+              )}
+
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm transition"
@@ -92,7 +100,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Sidebar Drawer (Mobile) */}
       {/* Sidebar Drawer (Mobile) */}
       <div
         className={`fixed top-0 right-0 h-full w-72 bg-white/80 backdrop-blur-lg border-l border-gray-200 rounded-l-3xl shadow-2xl transform transition-all duration-500 ease-in-out z-40 ${
@@ -141,6 +148,17 @@ const Navbar = () => {
                 <FiHome />
                 {role === "admin" ? "Admin Panel" : "Dashboard"}
               </Link>
+
+              {role === "user" && (
+                <Link
+                  to="/history"
+                  onClick={toggleMenu}
+                  className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-indigo-700 border border-indigo-600 rounded-full shadow-md hover:bg-indigo-50 transition-all duration-300"
+                >
+                  📁 History
+                </Link>
+              )}
+
               <button
                 onClick={handleLogout}
                 className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-red-500 border border-red-400 rounded-full shadow-md hover:bg-red-50 hover:text-red-600 transition-all duration-300"

@@ -1,23 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import NotFound from "./pages/NotFound";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
+import AdminDashboard from "./pages/AdminDashboard";
+import UserDashboard from "./pages/UserDashboard";
+import History from "./pages/History";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const Dashboard = () => (
-  <div className="text-center mt-10 text-lg font-semibold">
-    Welcome to User Dashboard
-  </div>
-);
-
-const Admin = () => (
-  <div className="text-center mt-10 text-lg font-semibold">Welcome Admin</div>
-);
 
 function App() {
   return (
@@ -29,36 +22,47 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
+                <RoleProtectedRoute allowedRole="user">
+                  <UserDashboard />
+                </RoleProtectedRoute>
               }
             />
+
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
+                <RoleProtectedRoute allowedRole="admin">
+                  <AdminDashboard />
+                </RoleProtectedRoute>
               }
             />
+
+            {/* ✅ New History route for users */}
+            <Route
+              path="/history"
+              element={
+                <RoleProtectedRoute allowedRole="user">
+                  <History />
+                </RoleProtectedRoute>
+              }
+            />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+
         <Footer />
-        {/* ToastContainer should be placed at the root level */}
+
         <ToastContainer
           position="top-right"
           autoClose={2500}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          pauseOnHover
-          draggable
           theme="colored"
+          pauseOnHover
+          closeOnClick
         />
       </div>
     </Router>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -10,10 +10,10 @@ const Home = () => {
 
   useEffect(() => {
     AOS.init({
-      duration: 1000,
+      duration: 800,
+      easing: "ease-in-out-cubic",
       once: false,
-      mirror: true,
-      easing: "ease-in-out",
+      mirror: false,
     });
     AOS.refresh();
   }, []);
@@ -27,27 +27,27 @@ const Home = () => {
     {
       icon: "📤",
       title: "Upload Files",
-      desc: "Easily upload your Excel files in .xlsx or .csv format.",
+      desc: "Easily upload Excel files in .xlsx or .csv format.",
     },
     {
       icon: "📊",
       title: "View Insights",
-      desc: "Automatically generate beautiful visual reports and charts.",
+      desc: "Generate beautiful visual reports and charts.",
     },
     {
       icon: "📁",
       title: "Manage Files",
-      desc: "Organize, rename, or delete your uploaded data files anytime.",
+      desc: "Organize, rename, or delete uploaded data files.",
     },
     {
       icon: "📎",
       title: "Share & Export",
-      desc: "Download reports or share insights with your team.",
+      desc: "Download or share insights with your team.",
     },
     {
       icon: "⬇️",
       title: "Download Report",
-      desc: "Access formatted report previews available for download anytime.",
+      desc: "Access and download your formatted reports anytime.",
     },
   ];
 
@@ -55,22 +55,21 @@ const Home = () => {
     {
       question: "Is my data safe?",
       answer:
-        "Absolutely. Your data is encrypted and securely stored using industry-standard practices.",
+        "Yes. Your data is encrypted and securely stored with industry-standard practices.",
     },
     {
       question: "Can I delete my files?",
       answer:
-        "Yes, you can delete or manage your uploaded files anytime from your dashboard.",
+        "Absolutely. You can manage or delete any uploaded files from your dashboard.",
     },
     {
-      question: "What types of Excel files are supported?",
-      answer:
-        "You can upload .xlsx and .csv files for analysis and visualization.",
+      question: "What file types are supported?",
+      answer: "You can upload Excel files in .xlsx or .csv format.",
     },
     {
-      question: "Can I share my reports with others?",
+      question: "Can I share my reports?",
       answer:
-        "Yes, you can export your visual reports and share them with your team or stakeholders.",
+        "Yes. Reports can be exported and shared with your team or clients.",
     },
   ];
 
@@ -78,27 +77,27 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <div className="max-w-7xl mx-auto px-4 pt-24 pb-32 text-center">
         {/* Hero Section */}
-        <section data-aos="fade-up" data-aos-anchor-placement="top-bottom">
+        <section data-aos="fade-up">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-6 leading-tight">
             Welcome to <span className="text-purple-700">Excel Analytics</span>{" "}
             📊
           </h1>
           <p className="text-gray-600 text-lg sm:text-xl max-w-2xl mx-auto">
             A secure and intuitive platform to upload and analyze your Excel
-            data with beautiful visual insights.
+            data with elegant visual insights.
           </p>
           <div className="mt-10 flex justify-center flex-wrap gap-4">
             {!token ? (
               <>
                 <Link
                   to="/login"
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 rounded-full shadow-xl transition duration-300 transform hover:scale-105 focus:ring-4 focus:ring-blue-200"
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-white text-blue-600 border border-blue-600 hover:bg-blue-50 px-8 py-3 rounded-full shadow-md transition duration-300 transform hover:scale-105 focus:ring-4 focus:ring-blue-100"
+                  className="bg-white text-blue-600 border border-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-200"
                 >
                   Register
                 </Link>
@@ -106,7 +105,7 @@ const Home = () => {
             ) : (
               <Link
                 to={role === "admin" ? "/admin" : "/dashboard"}
-                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white px-6 py-3 rounded-full shadow-xl transition duration-300 transform hover:scale-105 focus:ring-4 focus:ring-purple-200"
+                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white px-6 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300"
               >
                 Go to Dashboard
               </Link>
@@ -114,28 +113,27 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="mt-28 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 text-left">
+        {/* Features */}
+        <section className="mt-24 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 text-left">
           {[
             {
               title: "📤 Upload Excel Files",
-              text: "Easily upload .xlsx or .csv files and get started immediately.",
+              text: "Upload your .xlsx or .csv files quickly and start analyzing instantly.",
             },
             {
-              title: "📊 Instant Visualization",
-              text: "Visualize your data instantly with dynamic charts and tables.",
+              title: "📊 Visual Insights",
+              text: "Dynamic, auto-generated charts to help you see trends clearly.",
             },
             {
-              title: "🔐 Safe & Secure",
-              text: "Your files are encrypted and protected with modern security protocols.",
+              title: "🔐 Secure Storage",
+              text: "Your files are encrypted and stored safely with top-tier protocols.",
             },
           ].map((feature, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl p-6 shadow-md hover:shadow-2xl transition duration-300 transform hover:-translate-y-2"
+              className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-transform transform hover:-translate-y-2"
               data-aos="fade-up"
               data-aos-delay={index * 150}
-              data-aos-anchor-placement="top-bottom"
             >
               <h3 className="text-xl font-semibold text-gray-800 mb-2">
                 {feature.title}
@@ -146,22 +144,17 @@ const Home = () => {
         </section>
 
         {/* How It Works */}
-        <section
-          className="mt-28 max-w-6xl mx-auto"
-          data-aos="fade-up"
-          data-aos-anchor-placement="top-bottom"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-12">
+        <section className="mt-28 max-w-6xl mx-auto" data-aos="fade-up">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-12">
             How It Works
           </h2>
-
           <div className="grid md:grid-cols-3 gap-10 text-center">
             {howItWorksSteps.map((item, index) => (
               <div
                 key={index}
+                className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100 hover:shadow-2xl transform transition-all hover:-translate-y-1"
                 data-aos="zoom-in"
                 data-aos-delay={index * 100}
-                className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100 hover:shadow-2xl hover:-translate-y-1 transform transition duration-300"
               >
                 <div className="text-4xl mb-4">{item.icon}</div>
                 <h3 className="text-xl font-bold text-blue-700 mb-2">
@@ -174,18 +167,12 @@ const Home = () => {
         </section>
 
         {/* FAQ Section */}
-        <section
-          className="mt-28 max-w-3xl mx-auto"
-          data-aos="fade-up"
-          data-aos-anchor-placement="top-bottom"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-8">
+        <section className="mt-28 max-w-3xl mx-auto" data-aos="fade-up">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">
             Frequently Asked Questions
           </h2>
-
           {faqs.map((faq, index) => {
             const isOpen = openFaqIndex === index;
-
             return (
               <div
                 key={index}
@@ -193,20 +180,19 @@ const Home = () => {
               >
                 <button
                   onClick={() => setOpenFaqIndex(isOpen ? null : index)}
-                  className="w-full flex justify-between items-center px-5 py-4 text-lg font-semibold text-gray-800 focus:outline-none"
+                  className="w-full flex justify-between items-center px-6 py-4 text-lg font-semibold text-gray-800 focus:outline-none"
                 >
                   {faq.question}
                   <span
-                    className={`text-2xl text-blue-500 transform transition-transform duration-300 ${
-                      isOpen ? "rotate-45" : ""
+                    className={`text-3xl text-blue-500 transform transition-transform duration-300 ${
+                      isOpen ? "rotate-45" : "rotate-0"
                     }`}
                   >
                     +
                   </span>
                 </button>
-
                 <div
-                  className={`px-5 transition-max-height duration-300 ease-in-out overflow-hidden ${
+                  className={`px-6 transition-all duration-500 ease-in-out overflow-hidden ${
                     isOpen ? "max-h-40 pb-4" : "max-h-0"
                   }`}
                 >

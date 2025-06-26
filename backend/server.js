@@ -1,24 +1,38 @@
-// server.js
+// backend/server.js
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "./connection/db.js";
+import connectDB from "./connection/db.js"; // ✅ DB connection utility
 
-dotenv.config();
+// Route imports
+import authRoutes from "./routes/authRoutes.js";
+import chartRoutes from "./routes/chartRoutes.js"; // ✅ NEW: Chart & Upload Routes
+import aiRoutes from "./routes/ai.js";
+
+dotenv.config(); // Load env variables
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(express.json());
+// Connect to MongoDB
+connectDB();
 
-// Sample route
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// API Routes
+app.use("/api/auth", authRoutes);
+app.use("/api", chartRoutes);
+app.use("/api/ai", aiRoutes);
+
+// Test root
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.send("📊 Excel Analytics API is running...");
 });
 
-// Connect to DB and start server
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
