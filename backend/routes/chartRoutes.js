@@ -6,6 +6,7 @@ import {
   handleFileUpload,
   saveChartMetadata,
   getUserChartHistory,
+  deleteChart,
 } from "../controllers/chartController.js";
 
 const router = express.Router();
@@ -25,7 +26,8 @@ const upload = multer({
 
 // ✅ API Routes (standardized)
 router.post("/upload", verifyToken, upload.single("file"), handleFileUpload);
-router.post("/charts/save", verifyToken, saveChartMetadata); // ✅ match frontend
-router.get("/charts/history", verifyToken, getUserChartHistory); // ✅ match frontend
+router.post("/charts/save", verifyToken, saveChartMetadata);
+router.get("/charts/history", verifyToken, getUserChartHistory);
+router.delete("/charts/:id", verifyToken, deleteChart);
 
 export default router;
