@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  FiMenu,
-  FiX,
-  FiLogIn,
-  FiUserPlus,
-  FiHome,
-  FiLogOut,
-} from "react-icons/fi";
+import { FiMenu, FiX, FiLogIn, FiUserPlus, FiLogOut } from "react-icons/fi";
+import { HiOutlineChartBar, HiOutlineFolderOpen } from "react-icons/hi";
 import { toast } from "react-toastify";
 
 const Navbar = () => {
@@ -20,7 +14,6 @@ const Navbar = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     toast.success("Logged out successfully 👋");
-
     setMenuOpen(false);
     setTimeout(() => {
       navigate("/");
@@ -73,18 +66,19 @@ const Navbar = () => {
             <>
               <Link
                 to={role === "admin" ? "/admin" : "/dashboard"}
-                className="flex items-center gap-1 text-blue-600 font-semibold hover:underline"
+                className="flex items-center gap-2 text-indigo-700 hover:text-indigo-800 font-medium transition"
               >
-                <FiHome />
+                <HiOutlineChartBar />
                 {role === "admin" ? "Admin Panel" : "Dashboard"}
               </Link>
 
               {role === "user" && (
                 <Link
                   to="/history"
-                  className="flex items-center gap-1 text-gray-700 hover:text-indigo-600 transition font-medium"
+                  className="flex items-center gap-2 text-indigo-700 hover:text-indigo-800 font-medium transition"
                 >
-                  📁 History
+                  <HiOutlineFolderOpen />
+                  History
                 </Link>
               )}
 
@@ -143,9 +137,9 @@ const Navbar = () => {
               <Link
                 to={role === "admin" ? "/admin" : "/dashboard"}
                 onClick={toggleMenu}
-                className="flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full shadow-md hover:from-purple-700 hover:to-pink-600 transition-all duration-300"
+                className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-indigo-700 border border-indigo-600 rounded-full shadow-md hover:bg-indigo-50 transition-all duration-300"
               >
-                <FiHome />
+                <HiOutlineChartBar />
                 {role === "admin" ? "Admin Panel" : "Dashboard"}
               </Link>
 
@@ -155,7 +149,8 @@ const Navbar = () => {
                   onClick={toggleMenu}
                   className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-indigo-700 border border-indigo-600 rounded-full shadow-md hover:bg-indigo-50 transition-all duration-300"
                 >
-                  📁 History
+                  <HiOutlineFolderOpen />
+                  History
                 </Link>
               )}
 
