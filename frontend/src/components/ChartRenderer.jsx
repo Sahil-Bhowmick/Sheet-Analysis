@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Bar,
   Line,
@@ -11,7 +11,11 @@ import {
 import jsPDF from "jspdf";
 import { toPng } from "html-to-image";
 import { toast } from "react-toastify";
-import { saveChartMetadata, getChartInsight } from "../services/api";
+import {
+  saveChartMetadata,
+  updateChartMetadata,
+  getChartInsight,
+} from "../services/api";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -34,7 +38,6 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 
-// Register chart plugins
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -49,15 +52,23 @@ ChartJS.register(
   zoomPlugin
 );
 
-const ChartRenderer = ({ data, xKey, yKey, chartType, onMetaSaved }) => {
+const ChartRenderer = ({
+  data,
+  xKey,
+  yKey,
+  chartType,
+  onMetaSaved,
+  fileName,
+  fileId,
+}) => {
   const chartRef = useRef();
   const [insight, setInsight] = useState("");
   const [saving, setSaving] = useState(false);
   const [loadingInsight, setLoadingInsight] = useState(false);
+  const autoSavedFileRef = useRef(null);
 
   if (!data || !xKey || !yKey) return null;
 
-  // Special handling for scatter
   const isScatter = chartType === "scatter";
   const isXNumeric = data.every((row) => !isNaN(Number(row[xKey])));
   const isYNumeric = data.every((row) => !isNaN(Number(row[yKey])));
@@ -72,11 +83,11 @@ const ChartRenderer = ({ data, xKey, yKey, chartType, onMetaSaved }) => {
     );
   }
 
-  const title = `${yKey} vs ${xKey}`;
-
+  const title = `${
+    chartType[0].toUpperCase() + chartType.slice(1)
+  }: ${yKey} vs ${xKey}`;
   const labels = data.map((row) => row[xKey]);
   const values = data.map((row) => Number(row[yKey]));
-
   const scatterPoints = data.map((row) => ({
     x: Number(row[xKey]),
     y: Number(row[yKey]),
@@ -110,12 +121,7 @@ const ChartRenderer = ({ data, xKey, yKey, chartType, onMetaSaved }) => {
     maintainAspectRatio: false,
     indexAxis: chartType === "horizontalBar" ? "y" : "x",
     plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          color: "#4b5563",
-        },
-      },
+      legend: { position: "bottom", labels: { color: "#4b5563" } },
       zoom: !["pie", "doughnut", "polarArea"].includes(chartType)
         ? {
             zoom: {
@@ -123,10 +129,7 @@ const ChartRenderer = ({ data, xKey, yKey, chartType, onMetaSaved }) => {
               pinch: { enabled: true },
               mode: "xy",
             },
-            pan: {
-              enabled: true,
-              mode: "xy",
-            },
+            pan: { enabled: true, mode: "xy" },
           }
         : false,
     },
@@ -134,25 +137,24 @@ const ChartRenderer = ({ data, xKey, yKey, chartType, onMetaSaved }) => {
       ? {
           x: {
             type: isScatter ? "linear" : "category",
-            position: "bottom",
-            grid: { color: "#f3f4f6" },
-            ticks: { color: "#4b5563" },
             title: {
               display: true,
               text: xKey,
               color: "#6b7280",
               font: { weight: "bold" },
             },
+            ticks: { color: "#4b5563" },
+            grid: { color: "#f3f4f6" },
           },
           y: {
-            grid: { color: "#f3f4f6" },
-            ticks: { color: "#4b5563" },
             title: {
               display: true,
               text: yKey,
               color: "#6b7280",
               font: { weight: "bold" },
             },
+            ticks: { color: "#4b5563" },
+            grid: { color: "#f3f4f6" },
           },
         }
       : {},
@@ -198,8 +200,16 @@ const ChartRenderer = ({ data, xKey, yKey, chartType, onMetaSaved }) => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await saveChartMetadata({ chartType, xKey, yKey, title, data });
-      toast.success("✅ Chart saved to history");
+      await saveChartMetadata({
+        chartType,
+        xKey,
+        yKey,
+        title,
+        data,
+        fileName,
+        isPinned: true,
+      });
+      toast.success("✅ Chart saved to Saved Charts");
       onMetaSaved?.();
     } catch (err) {
       toast.error("Save failed");
@@ -219,6 +229,30 @@ const ChartRenderer = ({ data, xKey, yKey, chartType, onMetaSaved }) => {
       setLoadingInsight(false);
     }
   };
+
+  // ✅ Auto-save or update chart
+  useEffect(() => {
+    const autoSave = async () => {
+      if (!fileId || autoSavedFileRef.current === fileId) return;
+
+      try {
+        await updateChartMetadata(fileId, {
+          chartType,
+          xKey,
+          yKey,
+          title,
+          data,
+        });
+
+        autoSavedFileRef.current = fileId;
+        onMetaSaved?.();
+      } catch (err) {
+        console.error("Auto-update failed:", err.message);
+      }
+    };
+
+    autoSave();
+  }, [fileId, chartType]); // ✅ Update when chartType changes
 
   return (
     <div className="mt-10 rounded-2xl shadow-2xl border border-gray-200 p-8 bg-gradient-to-br from-white via-blue-50 to-blue-100 transition-all duration-300">

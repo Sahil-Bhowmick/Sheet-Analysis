@@ -86,26 +86,18 @@ const Home = () => {
             A secure and intuitive platform to upload and analyze your Excel
             data with elegant visual insights.
           </p>
-          <div className="mt-10 flex justify-center flex-wrap gap-4">
+          <div className="mt-10 flex justify-center">
             {!token ? (
-              <>
-                <Link
-                  to="/login"
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-white text-blue-600 border border-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-200"
-                >
-                  Register
-                </Link>
-              </>
+              <Link
+                to="/auth"
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-10 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 text-lg font-semibold"
+              >
+                Get Started
+              </Link>
             ) : (
               <Link
                 to={role === "admin" ? "/admin" : "/dashboard"}
-                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white px-6 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300"
+                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white px-10 py-3 rounded-full shadow-md transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 text-lg font-semibold"
               >
                 Go to Dashboard
               </Link>

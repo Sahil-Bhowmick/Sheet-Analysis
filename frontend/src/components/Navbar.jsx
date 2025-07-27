@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FiMenu, FiX, FiLogIn, FiUserPlus, FiLogOut } from "react-icons/fi";
-import { HiOutlineChartBar, HiOutlineFolderOpen } from "react-icons/hi";
+import { NavLink, useNavigate } from "react-router-dom";
+import { FiMenu, FiX, FiLogOut, FiUser } from "react-icons/fi";
+import {
+  HiOutlineChartBar,
+  HiOutlineFolderOpen,
+  HiOutlineBookmark,
+} from "react-icons/hi";
 import { toast } from "react-toastify";
 
 const Navbar = () => {
@@ -23,15 +27,31 @@ const Navbar = () => {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
+  const navLinkStyles = ({ isActive }) =>
+    `flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all duration-300 ease-in-out
+   ${
+     isActive
+       ? "bg-blue-600 text-white shadow-sm"
+       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+   }`;
+
+  const mobileNavStyles = ({ isActive }) =>
+    `flex items-center justify-center gap-2 py-3 px-5 rounded-full font-medium border transition-all duration-300 ease-in-out shadow-sm
+   ${
+     isActive
+       ? "bg-blue-600 text-white border-blue-600"
+       : "bg-white text-blue-700 border-blue-500 hover:bg-blue-50 hover:text-blue-600"
+   }`;
+
   return (
     <nav className="sticky top-0 z-50 bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 shadow-md border-b border-blue-200/50 backdrop-blur-md bg-opacity-95 px-6 py-4">
       <div className="max-w-screen-xl mx-auto flex items-center justify-between">
-        <Link
+        <NavLink
           to="/"
           className="text-xl font-bold text-blue-700 flex items-center gap-1"
         >
           📊 Excel Analytics
-        </Link>
+        </NavLink>
 
         {/* Hamburger Icon */}
         <div className="md:hidden">
@@ -44,47 +64,38 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-6 text-sm items-center">
+        <div className="hidden md:flex space-x-4 text-sm items-center">
           {!token ? (
-            <>
-              <Link
-                to="/login"
-                className="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition"
-              >
-                <FiLogIn />
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition"
-              >
-                <FiUserPlus />
-                Register
-              </Link>
-            </>
+            <NavLink to="/auth" className={navLinkStyles}>
+              <FiUser />
+              Login / Register
+            </NavLink>
           ) : (
             <>
-              <Link
+              <NavLink
                 to={role === "admin" ? "/admin" : "/dashboard"}
-                className="flex items-center gap-2 text-indigo-700 hover:text-indigo-800 font-medium transition"
+                className={navLinkStyles}
               >
                 <HiOutlineChartBar />
                 {role === "admin" ? "Admin Panel" : "Dashboard"}
-              </Link>
+              </NavLink>
 
               {role === "user" && (
-                <Link
-                  to="/history"
-                  className="flex items-center gap-2 text-indigo-700 hover:text-indigo-800 font-medium transition"
-                >
-                  <HiOutlineFolderOpen />
-                  History
-                </Link>
+                <>
+                  <NavLink to="/history" className={navLinkStyles}>
+                    <HiOutlineFolderOpen />
+                    History
+                  </NavLink>
+                  <NavLink to="/saved" className={navLinkStyles}>
+                    <HiOutlineBookmark />
+                    Saved Charts
+                  </NavLink>
+                </>
               )}
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-white bg-red-500 hover:bg-red-600 transition"
               >
                 <FiLogOut />
                 Logout
@@ -94,85 +105,90 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Sidebar Drawer (Mobile) */}
+      {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-white/80 backdrop-blur-lg border-l border-gray-200 rounded-l-3xl shadow-2xl transform transition-all duration-500 ease-in-out z-40 ${
-          menuOpen
-            ? "translate-x-0 opacity-100 scale-100"
-            : "translate-x-full opacity-0 scale-95"
-        } md:hidden`}
+        className={`fixed inset-0 z-40 flex md:hidden transition-opacity duration-300 ${
+          menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
       >
-        <div className="flex justify-end p-4">
-          <button
-            onClick={toggleMenu}
-            className="p-2 rounded-full hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
-            aria-label="Close menu"
-          >
-            <FiX size={24} />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-4 px-6 pt-4 text-sm">
-          {!token ? (
-            <>
-              <Link
-                to="/login"
-                onClick={toggleMenu}
-                className="flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full shadow-md hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
-              >
-                <FiLogIn />
-                Login
-              </Link>
-              <Link
-                to="/register"
-                onClick={toggleMenu}
-                className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-blue-700 border border-blue-600 rounded-full shadow-md hover:bg-blue-50 transition-all duration-300"
-              >
-                <FiUserPlus />
-                Register
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                to={role === "admin" ? "/admin" : "/dashboard"}
-                onClick={toggleMenu}
-                className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-indigo-700 border border-indigo-600 rounded-full shadow-md hover:bg-indigo-50 transition-all duration-300"
-              >
-                <HiOutlineChartBar />
-                {role === "admin" ? "Admin Panel" : "Dashboard"}
-              </Link>
-
-              {role === "user" && (
-                <Link
-                  to="/history"
-                  onClick={toggleMenu}
-                  className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-indigo-700 border border-indigo-600 rounded-full shadow-md hover:bg-indigo-50 transition-all duration-300"
-                >
-                  <HiOutlineFolderOpen />
-                  History
-                </Link>
-              )}
-
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-red-500 border border-red-400 rounded-full shadow-md hover:bg-red-50 hover:text-red-600 transition-all duration-300"
-              >
-                <FiLogOut />
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Blurred Overlay */}
-      {menuOpen && (
+        {/* Backdrop */}
         <div
-          className="fixed inset-0 backdrop-blur-sm bg-black/10 z-30 transition-opacity duration-300 md:hidden"
+          className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300"
           onClick={toggleMenu}
         ></div>
-      )}
+
+        {/* Sidebar */}
+        <div
+          className={`ml-auto h-full w-72 backdrop-blur-lg border-0.5 border-gray-200 rounded-l-3xl shadow-2xl transform transition-transform duration-500 ease-in-out ${
+            menuOpen ? "translate-x-0 scale-100" : "translate-x-full scale-95"
+          }`}
+        >
+          {/* Close Button */}
+          <div className="flex justify-end p-4">
+            <button
+              onClick={toggleMenu}
+              className="p-2 rounded-full hover:bg-gray-200 transition "
+              aria-label="Close menu"
+            >
+              <FiX size={26} />
+            </button>
+          </div>
+
+          {/* Sidebar Content */}
+          <div className="flex flex-col gap-4 px-6 pt-2 text-sm animate-fade-in">
+            {!token ? (
+              <NavLink
+                to="/auth"
+                onClick={toggleMenu}
+                className={mobileNavStyles}
+              >
+                <FiUser />
+                Login / Register
+              </NavLink>
+            ) : (
+              <>
+                <NavLink
+                  to={role === "admin" ? "/admin" : "/dashboard"}
+                  onClick={toggleMenu}
+                  className={mobileNavStyles}
+                >
+                  <HiOutlineChartBar />
+                  {role === "admin" ? "Admin Panel" : "Dashboard"}
+                </NavLink>
+
+                {role === "user" && (
+                  <>
+                    <NavLink
+                      to="/history"
+                      onClick={toggleMenu}
+                      className={mobileNavStyles}
+                    >
+                      <HiOutlineFolderOpen />
+                      History
+                    </NavLink>
+                    <NavLink
+                      to="/saved"
+                      onClick={toggleMenu}
+                      className={mobileNavStyles}
+                    >
+                      <HiOutlineBookmark />
+                      Saved Charts
+                    </NavLink>
+                  </>
+                )}
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center justify-center gap-2 py-3 px-4 bg-white text-red-500 border border-red-400 rounded-full shadow-md hover:bg-red-50 hover:text-red-600 transition-all duration-300"
+                >
+                  <FiLogOut />
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </nav>
   );
 };

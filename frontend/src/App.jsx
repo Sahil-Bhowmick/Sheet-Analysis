@@ -1,6 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -9,6 +12,10 @@ import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import History from "./pages/History";
+import SavedCharts from "./pages/SavedCharts";
+import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -20,8 +27,15 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+
+            {/* ✅ Auth-related routes */}
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/login" element={<Navigate to="/auth" replace />} />
+            <Route path="/register" element={<Navigate to="/auth" replace />} />
+
+            {/* ✅ Protected user routes */}
             <Route
               path="/dashboard"
               element={
@@ -32,16 +46,6 @@ function App() {
             />
 
             <Route
-              path="/admin"
-              element={
-                <RoleProtectedRoute allowedRole="admin">
-                  <AdminDashboard />
-                </RoleProtectedRoute>
-              }
-            />
-
-            {/* ✅ New History route for users */}
-            <Route
               path="/history"
               element={
                 <RoleProtectedRoute allowedRole="user">
@@ -50,6 +54,26 @@ function App() {
               }
             />
 
+            <Route
+              path="/saved"
+              element={
+                <RoleProtectedRoute allowedRole="user">
+                  <SavedCharts />
+                </RoleProtectedRoute>
+              }
+            />
+
+            {/* ✅ Admin route */}
+            <Route
+              path="/admin"
+              element={
+                <RoleProtectedRoute allowedRole="admin">
+                  <AdminDashboard />
+                </RoleProtectedRoute>
+              }
+            />
+
+            {/* ✅ 404 fallback */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

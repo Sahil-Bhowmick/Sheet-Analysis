@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { getChartHistory, deleteChartById } from "../services/api";
 import { format } from "date-fns";
-import Modal from "react-modal";
-import ChartRenderer from "../components/ChartRenderer";
+import ChartModal from "../components/ChartModal";
 import {
   FaChartBar,
   FaFileAlt,
@@ -12,11 +11,11 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-Modal.setAppElement("#root");
-
 const History = () => {
   const [history, setHistory] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   useEffect(() => {
     load();
@@ -31,14 +30,21 @@ const History = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete chart?")) return;
+  const confirmDelete = (id) => {
+    setDeleteTargetId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
     try {
-      await deleteChartById(id);
-      setHistory((h) => h.filter((c) => c._id !== id));
+      await deleteChartById(deleteTargetId);
+      setHistory((h) => h.filter((c) => c._id !== deleteTargetId));
       toast.success("Chart deleted");
     } catch (e) {
       toast.error("Delete failed");
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteTargetId(null);
     }
   };
 
@@ -73,7 +79,7 @@ const History = () => {
                     <FaEye />
                   </button>
                   <button
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => confirmDelete(item._id)}
                     className="hover:text-red-600 transition"
                     title="Delete Chart"
                   >
@@ -109,39 +115,15 @@ const History = () => {
         </div>
       )}
 
-      {/* Modal Chart Preview */}
-      <Modal
-        isOpen={!!selected}
-        onRequestClose={() => setSelected(null)}
-        overlayClassName="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-        className="bg-white max-w-4xl w-[90%] rounded-lg shadow-2xl p-6 outline-none overflow-auto max-h-[90vh]"
-      >
-        {selected && (
-          <div className="w-full">
-            <h2 className="text-2xl font-semibold text-center text-indigo-700 mb-6">
-              {selected.title || `${selected.yKey} vs ${selected.xKey}`}
-            </h2>
-
-            <div className="w-full max-w-3xl mx-auto px-2 overflow-x-auto">
-              <ChartRenderer
-                chartType={selected.chartType}
-                xKey={selected.xKey}
-                yKey={selected.yKey}
-                data={selected.data}
-              />
-            </div>
-
-            <div className="text-center">
-              <button
-                onClick={() => setSelected(null)}
-                className="mt-6 bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-md text-sm transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {/* Chart Modal */}
+      <ChartModal
+        selectedChart={selected}
+        show={!!selected}
+        onClose={() => setSelected(null)}
+        showDeleteModal={showDeleteModal}
+        onDeleteClose={() => setShowDeleteModal(false)}
+        onConfirmDelete={handleDelete}
+      />
     </div>
   );
 };

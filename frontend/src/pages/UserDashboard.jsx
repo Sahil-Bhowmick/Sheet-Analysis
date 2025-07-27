@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import FileUpload from "../components/FileUpload";
 import ChartRenderer from "../components/ChartRenderer";
+import ChartModal from "../components/ChartModal";
 import { getChartHistory, deleteChartById } from "../services/api";
+
 import {
   FaChartBar,
   FaArrowsAltH,
@@ -15,11 +17,9 @@ import {
   FaPlay,
 } from "react-icons/fa";
 import { format } from "date-fns";
-import Modal from "react-modal";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-
-Modal.setAppElement("#root");
+import { Chart } from "chart.js/auto";
 
 const UserDashboard = () => {
   const [excelData, setExcelData] = useState([]);
@@ -33,6 +33,8 @@ const UserDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [fileId, setFileId] = useState("");
+  const [hasSaved, setHasSaved] = useState(false);
 
   useEffect(() => {
     fetchHistory();
@@ -41,19 +43,25 @@ const UserDashboard = () => {
   const fetchHistory = async () => {
     try {
       const res = await getChartHistory();
-      setHistory(res.data.history);
+      const autoSaved = res.data.history
+        .filter((chart) => !chart.isPinned)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // ✅ Sort by newest
+        .slice(0, 3); // ✅ Limit to 3
+      setHistory(autoSaved);
     } catch (err) {
       toast.error("Failed to load chart history");
     }
   };
 
-  const handleParsedData = (jsonData, file) => {
+  const handleParsedData = (jsonData, file, chartMeta) => {
     setExcelData(jsonData);
     setXKey("");
     setYKey("");
     setChartType("bar");
     setGenerated(false);
     setFileName(file);
+    setFileId(chartMeta?._id);
+    setHasSaved(false); // reset
   };
 
   const confirmDelete = (id) => {
@@ -75,7 +83,6 @@ const UserDashboard = () => {
   };
 
   const headers = excelData.length ? Object.keys(excelData[0]) : [];
-  const recentHistory = history.slice(-3).reverse();
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-12">
@@ -83,15 +90,13 @@ const UserDashboard = () => {
         📈 Excel Analytics Dashboard
       </h1>
 
-      {/* Upload */}
       <div className="bg-white/70 shadow-xl rounded-xl p-6 backdrop-blur">
         <FileUpload onDataParsed={handleParsedData} />
       </div>
 
-      {/* Axis Selector */}
       {headers.length > 0 && (
         <div className="bg-white/90 shadow-xl rounded-2xl p-6 grid sm:grid-cols-3 gap-6 border border-gray-200">
-          <div className="relative">
+          <div>
             <label className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
               <FaArrowsAltH className="text-indigo-500" />
               Select X-Axis
@@ -99,7 +104,7 @@ const UserDashboard = () => {
             <select
               value={xKey}
               onChange={(e) => setXKey(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-indigo-500 text-gray-700 shadow-sm"
+              className="w-full rounded-lg border border-gray-300 p-2"
             >
               <option value="">-- Choose column --</option>
               {headers.map((h) => (
@@ -110,7 +115,7 @@ const UserDashboard = () => {
             </select>
           </div>
 
-          <div className="relative">
+          <div>
             <label className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
               <FaArrowsAltV className="text-indigo-500" />
               Select Y-Axis
@@ -118,7 +123,7 @@ const UserDashboard = () => {
             <select
               value={yKey}
               onChange={(e) => setYKey(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-indigo-500 text-gray-700 shadow-sm"
+              className="w-full rounded-lg border border-gray-300 p-2"
             >
               <option value="">-- Choose column --</option>
               {headers.map((h) => (
@@ -129,7 +134,7 @@ const UserDashboard = () => {
             </select>
           </div>
 
-          <div className="relative">
+          <div>
             <label className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
               <FaChartBar className="text-indigo-500" />
               Chart Type
@@ -137,7 +142,7 @@ const UserDashboard = () => {
             <select
               value={chartType}
               onChange={(e) => setChartType(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-indigo-500 text-gray-700 shadow-sm"
+              className="w-full rounded-lg border border-gray-300 p-2"
             >
               <option value="bar">Bar Chart</option>
               <option value="horizontalBar">Horizontal Bar</option>
@@ -152,7 +157,6 @@ const UserDashboard = () => {
         </div>
       )}
 
-      {/* Generate Button */}
       {xKey && yKey && chartType && (
         <div className="text-center">
           <button
@@ -164,18 +168,21 @@ const UserDashboard = () => {
         </div>
       )}
 
-      {/* Chart Renderer */}
-      {generated && (
+      {generated && fileId && (
         <ChartRenderer
           data={excelData}
           xKey={xKey}
           yKey={yKey}
           chartType={chartType}
           onMetaSaved={fetchHistory}
+          fileName={fileName}
+          fileId={fileId}
+          hasSaved={hasSaved}
+          setHasSaved={setHasSaved}
         />
       )}
 
-      {/* Chart History */}
+      {/* Chart History Section */}
       <div className="bg-white/30 backdrop-blur border border-gray-200 shadow-xl rounded-xl overflow-hidden transition-all duration-500">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-indigo-700 flex items-center gap-2">
@@ -185,11 +192,7 @@ const UserDashboard = () => {
             onClick={() => setShowHistory(!showHistory)}
             className="text-indigo-600 hover:text-indigo-800 transition-transform transform"
           >
-            {showHistory ? (
-              <FaChevronUp className="text-lg" />
-            ) : (
-              <FaChevronDown className="text-lg" />
-            )}
+            {showHistory ? <FaChevronUp /> : <FaChevronDown />}
           </button>
         </div>
 
@@ -204,7 +207,7 @@ const UserDashboard = () => {
             ) : (
               <>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {recentHistory.map((item) => (
+                  {history.map((item) => (
                     <div
                       key={item._id}
                       className="bg-white border border-gray-100 shadow-md rounded-lg p-5 flex flex-col transition hover:shadow-lg hover:-translate-y-1 duration-300"
@@ -260,81 +263,28 @@ const UserDashboard = () => {
                   ))}
                 </div>
 
-                {history.length > 3 && (
-                  <div className="text-center mt-6">
-                    <Link
-                      to="/history"
-                      className="inline-block text-indigo-600 font-medium hover:underline text-sm"
-                    >
-                      View All Charts →
-                    </Link>
-                  </div>
-                )}
+                <div className="text-center mt-6">
+                  <Link
+                    to="/history"
+                    className="inline-block text-indigo-600 font-medium hover:underline text-sm"
+                  >
+                    View All Charts →
+                  </Link>
+                </div>
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* Chart Preview Modal */}
-      <Modal
-        isOpen={!!selected}
-        onRequestClose={() => setSelected(null)}
-        overlayClassName="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-        className="bg-white max-w-4xl w-[90%] rounded-lg shadow-2xl p-6 outline-none overflow-auto max-h-[90vh]"
-      >
-        {selected && (
-          <div className="w-full">
-            <h2 className="text-2xl font-semibold text-center text-indigo-700 mb-6">
-              {selected.title || `${selected.yKey} vs ${selected.xKey}`}
-            </h2>
-
-            <div className="w-full max-w-3xl mx-auto px-2 overflow-x-auto">
-              <ChartRenderer
-                chartType={selected.chartType}
-                xKey={selected.xKey}
-                yKey={selected.yKey}
-                data={selected.data}
-              />
-            </div>
-
-            <div className="text-center">
-              <button
-                onClick={() => setSelected(null)}
-                className="mt-6 bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-md text-sm transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={showDeleteModal}
-        onRequestClose={() => setShowDeleteModal(false)}
-        overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-        className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full"
-      >
-        <h3 className="text-lg font-semibold text-red-600 mb-4">
-          Are you sure you want to delete this chart?
-        </h3>
-        <div className="flex justify-end gap-4">
-          <button
-            onClick={() => setShowDeleteModal(false)}
-            className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleDelete}
-            className="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-md"
-          >
-            Delete
-          </button>
-        </div>
-      </Modal>
+      <ChartModal
+        selectedChart={selected}
+        show={!!selected}
+        onClose={() => setSelected(null)}
+        showDeleteModal={showDeleteModal}
+        onDeleteClose={() => setShowDeleteModal(false)}
+        onConfirmDelete={handleDelete}
+      />
     </div>
   );
 };

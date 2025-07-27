@@ -1,46 +1,10 @@
-// import axios from "axios";
-
-// const API = axios.create({
-//   baseURL: "http://localhost:5000/api", // Update this if deployed
-// });
-
-// // Attach token to every request
-// API.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("token");
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
-// // ✅ Auth
-// export const registerUser = (userData) => API.post("/auth/register", userData);
-// export const loginUser = (userData) => API.post("/auth/login", userData);
-
-// // ✅ File Upload
-// export const uploadFile = (data) => API.post("/upload", data);
-
-// // ✅ Chart Metadata
-// // export const saveChartMetadata = (metadata) =>
-// //   API.post("/charts/save", metadata);
-// export const saveChartMetadata = (metadata) =>
-//   API.post("/charts/save", metadata); // Ensure `metadata` includes: data, chartType, xKey, yKey, title
-
-// export const getChartHistory = () => API.get("/charts/history");
-
-// // ✅ Route for Delete Chart Metadata
-// export const deleteChartById = (id) => API.delete(`/charts/${id}`);
-
-// // ✅ Route for AI Insight
-// export const getChartInsight = (payload) => API.post("/ai/summary", payload);
-
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // ⚠️ Update this if deploying
+  baseURL: "http://localhost:5000/api", // Change this in production
 });
 
-// ✅ Attach JWT token to every request
+// Attach JWT to every request
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -49,27 +13,31 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-//
-// ✅ Auth Routes
-//
+// Auth
 export const registerUser = (userData) => API.post("/auth/register", userData);
 export const loginUser = (userData) => API.post("/auth/login", userData);
+export const loginWithGoogle = (data) => API.post("/auth/firebase-login", data);
 
-//
-// ✅ File Upload - Now also saves metadata
-//
-export const uploadFile = (formData) => API.post("/upload", formData); // response contains { data, chart }
+// Forgot & Reset Password
+export const sendForgotPasswordLink = (email) =>
+  API.post("/auth/forgot-password", { email });
 
-//
-// ✅ Chart Metadata (manual save if needed)
-//
+export const resetPassword = (token, password) =>
+  API.post(`/auth/reset-password/${token}`, { password });
+
+// File Upload
+export const uploadFile = (formData) => API.post("/upload", formData);
+
+// Chart Metadata
 export const saveChartMetadata = (metadata) =>
-  API.post("/charts/save", metadata); // metadata must include: data, chartType, xKey, yKey, title
-
+  API.post("/charts/save", metadata);
+export const updateChartMetadata = (chartId, metadata) =>
+  API.put(`/charts/${chartId}`, metadata);
 export const getChartHistory = () => API.get("/charts/history");
 export const deleteChartById = (id) => API.delete(`/charts/${id}`);
 
-//
-// ✅ AI Insight (chart summary from OpenAI API)
-//
-export const getChartInsight = (payload) => API.post("/ai/summary", payload); // expects { xKey, yKey, data }
+// Pinned Charts
+export const getSavedCharts = () => API.get("/charts/saved");
+
+// AI Insights
+export const getChartInsight = (payload) => API.post("/ai/summary", payload);
