@@ -5,13 +5,14 @@ import { verifyToken } from "../middleware/auth.js";
 import {
   handleFileUpload,
   saveChartMetadata,
+  updateChartMetadata,
   getUserChartHistory,
+  getPinnedCharts,
   deleteChart,
 } from "../controllers/chartController.js";
 
 const router = express.Router();
 
-// Multer memory storage config
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
@@ -24,10 +25,20 @@ const upload = multer({
   },
 });
 
-// ✅ API Routes (standardized)
+// Upload + auto save
 router.post("/upload", verifyToken, upload.single("file"), handleFileUpload);
+
+// Save chart manually (isPinned: true or false)
 router.post("/charts/save", verifyToken, saveChartMetadata);
+
+// ✅ Update existing chart (after "Generate Analysis")
+router.put("/charts/:id", verifyToken, updateChartMetadata);
+
+// Fetch chart history and saved charts
 router.get("/charts/history", verifyToken, getUserChartHistory);
+router.get("/charts/saved", verifyToken, getPinnedCharts);
+
+// Delete chart
 router.delete("/charts/:id", verifyToken, deleteChart);
 
 export default router;

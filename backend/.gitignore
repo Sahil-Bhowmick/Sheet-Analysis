@@ -30,3 +30,5 @@ out/
 # Misc
 coverage/
 *.local
+
+firebase-service-account.json

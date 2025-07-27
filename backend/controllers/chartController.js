@@ -1,30 +1,10 @@
 import XLSX from "xlsx";
 import ChartMeta from "../models/ChartMeta.js";
 
-// ✅ 1. Handle Excel File Upload and Parse
-// export const handleFileUpload = async (req, res) => {
-//   try {
-//     const file = req.file;
-
-//     if (!file) return res.status(400).json({ message: "No file uploaded" });
-
-//     const workbook = XLSX.read(file.buffer, { type: "buffer" });
-//     const sheetName = workbook.SheetNames[0];
-//     const worksheet = workbook.Sheets[sheetName];
-//     const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-//     return res.status(200).json({ data: jsonData });
-//   } catch (err) {
-//     return res
-//       .status(500)
-//       .json({ message: "Failed to parse Excel file", error: err.message });
-//   }
-// };
-// ✅ Auto-save chart on upload
+// ✅ Auto-save on file upload (as empty chartType)
 export const handleFileUpload = async (req, res) => {
   try {
     const file = req.file;
-
     if (!file) return res.status(400).json({ message: "No file uploaded" });
 
     const workbook = XLSX.read(file.buffer, { type: "buffer" });
@@ -32,7 +12,6 @@ export const handleFileUpload = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-    // Auto-pick first two numeric columns as X and Y
     const headers = Object.keys(jsonData[0] || {});
     const numericKeys = headers.filter(
       (key) => typeof jsonData[0][key] === "number"
@@ -40,8 +19,7 @@ export const handleFileUpload = async (req, res) => {
 
     if (numericKeys.length < 2) {
       return res.status(400).json({
-        message:
-          "File must contain at least two numeric columns for auto-charting",
+        message: "File must contain at least two numeric columns",
       });
     }
 
@@ -50,36 +28,34 @@ export const handleFileUpload = async (req, res) => {
 
     const newMeta = new ChartMeta({
       userId: req.userId,
-      chartType: "bar", // default chart
+      chartType: "",
       xKey,
       yKey,
-      title: `Auto: ${yKey} vs ${xKey}`,
+      title: `${yKey} vs ${xKey}`,
       data: jsonData,
       fileName: file.originalname,
     });
 
     await newMeta.save();
 
-    return res.status(200).json({
-      message: "File parsed and chart auto-saved",
+    res.status(200).json({
+      message: "File parsed and chart saved",
       data: jsonData,
       chart: newMeta,
+      fileId: newMeta._id, // Sent to frontend for later update
     });
   } catch (err) {
-    return res.status(500).json({
-      message: "Failed to parse Excel file",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Upload failed", error: err.message });
   }
 };
 
-// ✅ 2. Save Chart Metadata
+// ✅ Save chart (from UI - pinned or not)
 export const saveChartMetadata = async (req, res) => {
   try {
-    const { chartType, xKey, yKey, title, data } = req.body;
+    const { chartType, xKey, yKey, title, data, isPinned, fileName } = req.body;
 
     if (!data || !Array.isArray(data)) {
-      return res.status(400).json({ message: "Chart data is required" });
+      return res.status(400).json({ message: "Chart data required" });
     }
 
     const meta = new ChartMeta({
@@ -88,49 +64,87 @@ export const saveChartMetadata = async (req, res) => {
       xKey,
       yKey,
       title,
-      data, // ✅ save parsed Excel data
+      fileName,
+      isPinned: isPinned || false,
+      data,
     });
 
     await meta.save();
-    res.status(201).json({ message: "Chart metadata saved", meta });
+    res.status(201).json({ message: "Chart saved", meta });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error saving chart metadata", error: err.message });
+    res.status(500).json({ message: "Save failed", error: err.message });
   }
 };
-// ✅ 3. Get User's Chart History
 
+// ✅ Update chartType/title of previously saved chart (used after Generate Analysis)
+export const updateChartMetadata = async (req, res) => {
+  try {
+    const chartId = req.params.id;
+    const { chartType, xKey, yKey, title, data } = req.body;
+
+    const updated = await ChartMeta.findOneAndUpdate(
+      { _id: chartId, userId: req.userId },
+      { chartType, xKey, yKey, title, data },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Chart not found" });
+    }
+
+    res.status(200).json({ message: "Chart updated", chart: updated });
+  } catch (err) {
+    res.status(500).json({ message: "Update failed", error: err.message });
+  }
+};
+
+// ✅ Get chart history (isPinned: false)
 export const getUserChartHistory = async (req, res) => {
   try {
-    const userId = req.userId;
-    const history = await ChartMeta.find({ userId }).sort({ createdAt: -1 });
+    const history = await ChartMeta.find({
+      userId: req.userId,
+      isPinned: false,
+    }).sort({ createdAt: -1 });
+
     res.status(200).json({ history });
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Failed to fetch chart history", error: err.message });
+      .json({ message: "Fetch history failed", error: err.message });
   }
 };
 
-// ✅ 4. Delete a chart by ID
-export const deleteChart = async (req, res) => {
+// ✅ Get pinned/saved charts (isPinned: true)
+export const getPinnedCharts = async (req, res) => {
   try {
-    const chartId = req.params.id;
-    const userId = req.userId;
+    const savedCharts = await ChartMeta.find({
+      userId: req.userId,
+      isPinned: true,
+    }).sort({ createdAt: -1 });
 
-    const deleted = await ChartMeta.findOneAndDelete({ _id: chartId, userId });
-
-    if (!deleted) {
-      return res
-        .status(404)
-        .json({ message: "Chart not found or unauthorized" });
-    }
-
-    res.status(200).json({ message: "Chart deleted successfully" });
+    res.status(200).json({ savedCharts });
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Failed to delete chart", error: err.message });
+      .json({ message: "Fetch pinned charts failed", error: err.message });
+  }
+};
+
+// ✅ Delete chart by ID
+export const deleteChart = async (req, res) => {
+  try {
+    const chartId = req.params.id;
+    const deleted = await ChartMeta.findOneAndDelete({
+      _id: chartId,
+      userId: req.userId,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Chart not found" });
+    }
+
+    res.status(200).json({ message: "Chart deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Delete failed", error: err.message });
   }
 };

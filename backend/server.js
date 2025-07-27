@@ -8,6 +8,7 @@ import connectDB from "./connection/db.js"; // ✅ DB connection utility
 import authRoutes from "./routes/authRoutes.js";
 import chartRoutes from "./routes/chartRoutes.js"; // ✅ NEW: Chart & Upload Routes
 import aiRoutes from "./routes/ai.js";
+import adminRoutes from "./routes/adminRoutes.js"; // ✅ NEW: Admin Routes
 
 dotenv.config(); // Load env variables
 
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api", chartRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Test root
 app.get("/", (req, res) => {
