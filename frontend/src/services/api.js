@@ -41,3 +41,11 @@ export const getSavedCharts = () => API.get("/charts/saved");
 
 // AI Insights
 export const getChartInsight = (payload) => API.post("/ai/summary", payload);
+
+// Admin Routes
+export const deleteUser = (id) => API.delete(`/admin/user/${id}`);
+export const getAllUsers = () => API.get("/admin/users");
+export const updateUserRole = (id, role) =>
+  API.put(`/admin/user/${id}/role`, { role });
+export const toggleUserBlock = (id) => API.put(`/admin/user/${id}/block`);
+export const getAdminStats = () => API.get("/admin/stats");

@@ -47,10 +47,19 @@ const Auth = () => {
           email: formData.email,
           password: formData.password,
         });
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("role", res.data.role);
+
+        const role = res.data.role?.toLowerCase();
+        const token = res.data.token;
+
+        if (!token || !role) {
+          throw new Error("Invalid login response");
+        }
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
+
         toast.success("Login successful!");
-        navigate(res.data.role === "admin" ? "/admin" : "/dashboard");
+        navigate(role === "admin" ? "/admin" : "/dashboard");
       } else {
         if (formData.password !== formData.confirmPassword) {
           return toast.error("Passwords do not match");
@@ -61,7 +70,10 @@ const Auth = () => {
         setIsLogin(true);
       }
     } catch (err) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
       toast.error(err.response?.data?.message || "Something went wrong");
+      console.error("Auth error:", err);
     }
   };
 
@@ -70,14 +82,24 @@ const Auth = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const idToken = await user.getIdToken();
+
       const res = await loginWithGoogle({ idToken });
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.role);
+      const role = res.data.role?.toLowerCase();
+      const token = res.data.token;
+
+      if (!token || !role) {
+        throw new Error("Invalid Google login response");
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
 
       toast.success("Google login successful!");
-      navigate(res.data.role === "admin" ? "/admin" : "/dashboard");
+      navigate(role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
       toast.error("Google sign-in failed");
       console.error("Google login error:", err);
     }
