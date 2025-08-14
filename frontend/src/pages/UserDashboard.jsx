@@ -45,8 +45,8 @@ const UserDashboard = () => {
       const res = await getChartHistory();
       const autoSaved = res.data.history
         .filter((chart) => !chart.isPinned)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // ✅ Sort by newest
-        .slice(0, 3); // ✅ Limit to 3
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 3);
       setHistory(autoSaved);
     } catch (err) {
       toast.error("Failed to load chart history");

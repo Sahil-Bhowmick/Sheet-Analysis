@@ -14,7 +14,7 @@ const firebaseConfig = {
   storageBucket: "sheet-analytics-66ef9.firebasestorage.app",
   messagingSenderId: "722704012372",
   appId: "1:722704012372:web:a844eabc7d4834468449c1",
-  measurementId: "G-GRMP506ZKR"
+  measurementId: "G-GRMP506ZKR",
 };
 
 // Initialize Firebase

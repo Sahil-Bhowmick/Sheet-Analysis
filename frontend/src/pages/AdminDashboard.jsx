@@ -21,6 +21,7 @@ import {
 import Pagination from "../components/Pagination";
 import Modal from "../components/Modal";
 import StatCard from "../components/StatCard";
+import AdminDashboardSkeleton from "../components/AdminDashboardSkeleton";
 
 const shimmer =
   "bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse";
@@ -288,12 +289,7 @@ const AdminDashboard = () => {
           </div>
 
           {loading ? (
-            <div className="text-center text-gray-400 py-10">
-              <div className={`h-10 w-1/2 mx-auto rounded-xl ${shimmer}`}></div>
-              <div
-                className={`h-10 w-1/2 mx-auto rounded-xl mt-2 ${shimmer}`}
-              ></div>
-            </div>
+            <AdminDashboardSkeleton />
           ) : (
             <>
               {/* Desktop Table */}
@@ -306,30 +302,55 @@ const AdminDashboard = () => {
                   className="hidden md:block overflow-x-auto rounded-xl shadow-lg bg-white mt-4"
                 >
                   <table className="min-w-full text-sm text-left divide-y divide-gray-200">
-                    <thead className="bg-gradient-to-r from-indigo-50 to-sky-50 sticky top-0 z-10">
+                    <thead className="bg-gradient-to-r from-indigo-100 via-sky-100 to-cyan-100 sticky top-0 z-10 shadow-sm">
                       <tr>
-                        {["name", "email", "role", "isBlocked"].map((key) => (
-                          <th
-                            key={key}
-                            onClick={() => handleSort(key)}
-                            className="px-5 py-3 font-semibold text-indigo-700 cursor-pointer hover:text-indigo-900 whitespace-nowrap transition select-none"
-                          >
-                            <span className="flex items-center gap-1">
-                              {key === "isBlocked"
-                                ? "Status"
-                                : key.charAt(0).toUpperCase() + key.slice(1)}
-                              {sortConfig.key === key &&
-                                (sortConfig.direction === "asc" ? (
-                                  <FiChevronUp />
-                                ) : (
-                                  <FiChevronDown />
-                                ))}
-                            </span>
-                          </th>
-                        ))}
-                        <th className="px-5 py-3 text-center">Actions</th>
+                        {["name", "email", "role", "isBlocked"].map((key) => {
+                          const isActive = sortConfig.key === key;
+                          const isAsc =
+                            isActive && sortConfig.direction === "asc";
+                          const isDesc =
+                            isActive && sortConfig.direction === "desc";
+
+                          return (
+                            <th
+                              key={key}
+                              onClick={() => handleSort(key)}
+                              className="px-5 py-4 font-semibold text-indigo-800 text-sm tracking-wide cursor-pointer hover:text-indigo-900 transition-all select-none whitespace-nowrap"
+                            >
+                              <span className="flex items-center justify-start gap-1.5 group">
+                                <span>
+                                  {key === "isBlocked"
+                                    ? "Status"
+                                    : key.charAt(0).toUpperCase() +
+                                      key.slice(1)}
+                                </span>
+
+                                <span className="flex flex-col text-[11px] leading-none text-gray-400 group-hover:text-indigo-500 transition-all duration-200">
+                                  <FiChevronUp
+                                    className={`transition-transform duration-200 ${
+                                      isAsc
+                                        ? "text-indigo-800 scale-110"
+                                        : "opacity-50"
+                                    }`}
+                                  />
+                                  <FiChevronDown
+                                    className={`-mt-[2px] transition-transform duration-200 ${
+                                      isDesc
+                                        ? "text-indigo-800 scale-110"
+                                        : "opacity-50"
+                                    }`}
+                                  />
+                                </span>
+                              </span>
+                            </th>
+                          );
+                        })}
+                        <th className="px-5 py-4 text-center font-semibold text-indigo-800 text-sm tracking-wide">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
+
                     <tbody className="divide-y divide-gray-100 bg-white">
                       <AnimatePresence>
                         {currentUsers.map((u) => (
