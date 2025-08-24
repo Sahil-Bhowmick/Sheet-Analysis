@@ -12,12 +12,13 @@
   "dependencies": {
     "@headlessui/react": "^2.2.6",
     "@react-oauth/google": "^0.12.2",
-    "@react-three/drei": "^10.6.1",
+    "@react-three/drei": "^10.7.3",
     "@react-three/fiber": "^9.3.0",
     "@tailwindcss/vite": "^4.1.10",
     "aos": "^2.3.4",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
     "chart.js": "^4.5.0",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "chartjs-plugin-zoom": "^2.2.0",
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
@@ -36,8 +37,10 @@
     "react-modal": "^3.16.3",
     "react-router-dom": "^7.6.2",
     "react-toastify": "^11.0.5",
+    "react-window": "^1.8.11",
     "tailwindcss": "^4.1.10",
     "three": "^0.177.0",
+    "three-orbitcontrols": "^2.110.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
