@@ -237,10 +237,20 @@ const ChartRenderer = ({
   const generateInsight = async () => {
     try {
       setLoadingInsight(true);
-      const res = await getChartInsight({ chartType, xKey, yKey, data });
-      setInsight(res.data?.summary || "");
+      const sample = Array.isArray(data) ? data.slice(0, 150) : [];
+      const res = await getChartInsight({
+        chartType,
+        xKey,
+        yKey,
+        data: sample,
+      });
+      -(-setInsight(res.data?.summary || ""));
+      +setInsight(res.insight || res.data?.insight || "");
     } catch (err) {
-      toast.error("AI insight generation failed");
+      const msg =
+        err?.response?.data?.error || err.message || "AI insight failed";
+      console.error("AI insight error:", err?.response?.data || err);
+      toast.error(msg);
     } finally {
       setLoadingInsight(false);
     }

@@ -275,32 +275,6 @@ const UserDashboard = () => {
       );
   }, [history, debouncedQuery, typeFilter, sortDir]);
 
-  // drag reorder (UI-only)
-  const handleDragStart = (e, idx) => {
-    setDragIndex(idx);
-    e.dataTransfer.effectAllowed = "move";
-    setIsDragging(true);
-  };
-  const handleDragOver = (e, idx) => {
-    e.preventDefault();
-    if (idx === dragIndex) return;
-  };
-  const handleDrop = (e, idx) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (dragIndex == null) return;
-    const list = [...filtered];
-    const moved = list.splice(dragIndex, 1)[0];
-    list.splice(idx, 0, moved);
-    const ids = list.map((x) => x._id);
-    const combined = [...pinned, ...history];
-    const reorder = combined
-      .filter((c) => ids.includes(c._id))
-      .concat(combined.filter((c) => !ids.includes(c._id)));
-    setHistory(reorder.filter((x) => !x.isPinned));
-    setDragIndex(null);
-  };
-
   // keyboard shortcuts
   useEffect(() => {
     const onKey = (e) => {
@@ -663,7 +637,6 @@ const UserDashboard = () => {
             onMetaSaved={fetchHistory}
             fileName={fileName}
             fileId={fileId}
-            /* new props to control 3D from dashboard */
             use3D={use3D}
             zKey={zKey || null}
           />

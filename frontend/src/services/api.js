@@ -40,7 +40,8 @@ export const deleteChartById = (id) => API.delete(`/charts/${id}`);
 export const getSavedCharts = () => API.get("/charts/saved");
 
 // AI Insights
-export const getChartInsight = (payload) => API.post("/ai/summary", payload);
+// AI Insights
+export const getChartInsight = (payload) => API.post("/ai/insight", payload);
 
 // Admin Routes
 export const deleteUser = (id) => API.delete(`/admin/user/${id}`);
