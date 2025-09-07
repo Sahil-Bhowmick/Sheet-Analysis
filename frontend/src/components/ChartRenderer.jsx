@@ -244,17 +244,25 @@ const ChartRenderer = ({
         yKey,
         data: sample,
       });
-      -(-setInsight(res.data?.summary || ""));
-      +setInsight(res.insight || res.data?.insight || "");
+      setInsight(res.insight || res.data?.insight || "No insight generated.");
     } catch (err) {
       const msg =
         err?.response?.data?.error || err.message || "AI insight failed";
       console.error("AI insight error:", err?.response?.data || err);
       toast.error(msg);
+      setInsight("⚠️ Could not generate insight.");
     } finally {
       setLoadingInsight(false);
     }
   };
+
+  // 🔹 Auto-generate insight when chart renders
+  useEffect(() => {
+    if (data && data.length > 0) {
+      generateInsight();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartType, data, xKey, yKey]);
 
   useEffect(() => {
     const autoSave = async () => {
@@ -662,35 +670,30 @@ const ChartRenderer = ({
   }, []);
 
   return (
-    <div className="mt-8 rounded-2xl shadow-2xl border border-gray-200 p-6 bg-white transition-all duration-300">
-      <h3 className="text-2xl md:text-3xl font-bold text-center text-indigo-700 mb-4">
+    <div className="mt-10 rounded-3xl shadow-xl border border-gray-100 p-6 bg-gradient-to-br from-white via-indigo-50 to-purple-50 transition-all duration-500">
+      {/* Title */}
+      <h3 className="text-2xl md:text-3xl font-extrabold text-center text-indigo-700 tracking-tight mb-6">
         {title}
       </h3>
 
+      {/* Chart Area */}
       <div
         ref={chartRef}
-        className={`mx-auto bg-white rounded-lg p-2 shadow-inner ${
+        className={`relative mx-auto rounded-2xl bg-white/80 backdrop-blur-lg border border-gray-200 shadow-inner p-4 ${
           use3D ? "h-[640px]" : "h-[420px]"
-        } overflow-hidden`}
-        style={{ minHeight: 320 }}
+        }`}
       >
-        {!use3D && (
+        {!use3D ? (
           <div className="w-full h-full">
             <ChartComponent data={chartData} options={chartOptions} />
           </div>
-        )}
-
-        {use3D && (
-          <div className="w-full h-full">
+        ) : (
+          <div className="w-full h-full relative">
             <Canvas camera={{ position: [0, 6, 12], fov: 50 }}>
-              <color attach="background" args={["#ffffff"]} />
+              <color attach="background" args={["#fafafa"]} />
               <OrbitControls enablePan enableZoom enableRotate />
-              <gridHelper
-                args={[20, 20, "#e6e6e6", "#f3f4f6"]}
-                position={[0, 0, 0]}
-              />
+              <gridHelper args={[20, 20, "#e6e6e6", "#f3f4f6"]} />
               <Axes />
-              {/* choose the proper 3D visual */}
               {isBar && <ThreeDBar vals={values} />}
               {isLine && <ThreeDLine pts={scatterPoints} />}
               {isScatter && <ThreeDScatter pts={scatterPoints} />}
@@ -703,15 +706,11 @@ const ChartRenderer = ({
               {isRadar && <ThreeDRadial vals={values} />}
             </Canvas>
 
-            {/* Hover tooltip overlay for 3D hover events */}
+            {/* Hover Tooltip */}
             {hover3d && hover3d.label && (
-              <div
-                style={{ position: "absolute", right: 24, top: 24, zIndex: 40 }}
-              >
-                <div className="bg-white p-2 rounded shadow text-sm">
-                  <div className="font-medium">{hover3d.label}</div>
-                  <div className="text-xs text-gray-600">{hover3d.value}</div>
-                </div>
+              <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-2 rounded-lg shadow-md text-sm">
+                <div className="font-semibold">{hover3d.label}</div>
+                <div className="text-xs text-gray-500">{hover3d.value}</div>
               </div>
             )}
           </div>
@@ -719,59 +718,51 @@ const ChartRenderer = ({
       </div>
 
       {/* Actions */}
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
+      <div className="mt-8 flex flex-wrap justify-center gap-4">
         <button
           onClick={() => {
             setUse3D(false);
             downloadPNG();
           }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full flex items-center gap-2 transition shadow-md"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
         >
-          <FaDownload /> Download PNG
+          <FaDownload /> PNG
         </button>
+
         <button
           onClick={() => {
             setUse3D(false);
             downloadPDF();
           }}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full flex items-center gap-2 transition shadow-md"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
         >
-          <FaFilePdf /> Download PDF
+          <FaFilePdf /> PDF
         </button>
+
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition shadow-md disabled:opacity-50"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50"
         >
-          <FaSave /> {saving ? "Saving..." : "Save Chart"}
+          <FaSave /> {saving ? "Saving..." : "Save"}
         </button>
+
         <button
           onClick={generateInsight}
           disabled={loadingInsight}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition shadow-md disabled:opacity-50"
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50"
         >
-          <FaRobot /> {loadingInsight ? "Thinking..." : "Generate AI Insight"}
-        </button>
-
-        <button
-          onClick={() => setUse3D((s) => !s)}
-          title="Toggle 3D preview"
-          className={`ml-2 px-3 py-2 rounded-md border ${
-            use3D
-              ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-              : "bg-white border-gray-200 text-gray-700"
-          }`}
-        >
-          {use3D ? "Viewing 3D" : "View 3D"}
+          <FaRobot /> {loadingInsight ? "Generating..." : "AI Insight"}
         </button>
       </div>
 
+      {/* Insight Box */}
       {insight && (
-        <div className="mt-6 mx-auto max-w-3xl bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md shadow-md text-blue-800 text-sm">
-          <div className="flex items-center gap-2 font-medium mb-1">
-            <FaCheckCircle className="text-blue-500" /> AI Insight
-          </div>
-          <p className="leading-relaxed">{insight}</p>
+        <div className="mt-8 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-5 border border-gray-100">
+          <h4 className="font-semibold text-lg text-indigo-700 mb-2 flex items-center gap-2">
+            <FaCheckCircle className="text-green-500" /> AI Insight
+          </h4>
+          <p className="text-gray-700 leading-relaxed">{insight}</p>
         </div>
       )}
     </div>
